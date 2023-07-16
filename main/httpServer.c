@@ -5,12 +5,13 @@
 */
 
 static const char *HTTPSERVER_TAG = "httpServer";
+static const char *HTML = "<a href=/ledOn>Turn LED On</a><br><a href=/ledOff>Turn LED Off</a>";
 
 /* An HTTP GET handler */
 static esp_err_t root_get_handler(httpd_req_t *req)
 {
     httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, "<h1>Hello Secure World!</h1>", HTTPD_RESP_USE_STRLEN);
+    httpd_resp_send(req, HTML, HTTPD_RESP_USE_STRLEN);
 
     return ESP_OK;
 }
@@ -19,6 +20,36 @@ static const httpd_uri_t root = {
     .uri       = "/",
     .method    = HTTP_GET,
     .handler   = root_get_handler
+};
+
+static esp_err_t httpd_handler_ledOn(httpd_req_t *req)
+{
+    int led = misc_led(1);
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, HTML, HTTPD_RESP_USE_STRLEN);
+
+    return ESP_OK;
+}
+
+static const httpd_uri_t httpd_ledOn = {
+    .uri       = "/ledOn",
+    .method    = HTTP_GET,
+    .handler   = httpd_handler_ledOn
+};
+
+static esp_err_t httpd_handler_ledOff(httpd_req_t *req)
+{
+    int led = misc_led(0);
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, HTML, HTTPD_RESP_USE_STRLEN);
+
+    return ESP_OK;
+}
+
+static const httpd_uri_t httpd_ledOff = {
+    .uri       = "/ledOff",
+    .method    = HTTP_GET,
+    .handler   = httpd_handler_ledOff
 };
 
 static httpd_handle_t start_webserver(void)
@@ -40,9 +71,6 @@ static httpd_handle_t start_webserver(void)
     conf.prvtkey_pem = prvtkey_pem_start;
     conf.prvtkey_len = prvtkey_pem_end - prvtkey_pem_start;
 
-#if CONFIG_EXAMPLE_ENABLE_HTTPS_USER_CALLBACK
-    conf.user_cb = https_server_user_callback;
-#endif
     esp_err_t ret = httpd_ssl_start(&server, &conf);
     if (ESP_OK != ret) {
         ESP_LOGI(HTTPSERVER_TAG, "Error starting server!");
@@ -52,6 +80,8 @@ static httpd_handle_t start_webserver(void)
     // Set URI handlers
     ESP_LOGI(HTTPSERVER_TAG, "Registering URI handlers");
     httpd_register_uri_handler(server, &root);
+    httpd_register_uri_handler(server, &httpd_ledOn);
+    httpd_register_uri_handler(server, &httpd_ledOff);
     return server;
 }
 
@@ -60,28 +90,6 @@ static esp_err_t stop_webserver(httpd_handle_t server)
     // Stop the httpd server
     return httpd_ssl_stop(server);
 }
-
-// static void disconnect_handler(void* arg, esp_event_base_t event_base,
-//                                int32_t event_id, void* event_data)
-// {
-//     httpd_handle_t* server = (httpd_handle_t*) arg;
-//     if (*server) {
-//         if (stop_webserver(*server) == ESP_OK) {
-//             *server = NULL;
-//         } else {
-//             ESP_LOGE(HTTPSERVER_TAG, "Failed to stop https server");
-//         }
-//     }
-// }
-
-// static void connect_handler(void* arg, esp_event_base_t event_base,
-//                             int32_t event_id, void* event_data)
-// {
-//     httpd_handle_t* server = (httpd_handle_t*) arg;
-//     if (*server == NULL) {
-//         *server = start_webserver();
-//     }
-// }
 
 static httpd_handle_t server = NULL;
 
@@ -101,9 +109,5 @@ void httpServer_start() {
 
 void httpServer_init(void)
 {
-    //ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    //ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
-    //ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
 
 }

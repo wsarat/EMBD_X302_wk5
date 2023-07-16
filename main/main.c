@@ -4,6 +4,7 @@
 #include "wifi.h"
 #include "httpServer.h"
 #include "httpClient.h"
+#include "misc.h"
 
 void nvs_init() {
     esp_err_t ret = nvs_flash_init();
@@ -22,6 +23,7 @@ void app_main(void)
 
     httpServer_init();
     //httpClient_main();
+    misc_init();
 
     //uint16_t ap_count = 16; //will ne changed after wifi_scan called
     //struct ap_info_t ap_list[ap_count];

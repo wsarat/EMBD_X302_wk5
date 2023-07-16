@@ -4,6 +4,7 @@
 #include "esp_tls.h"
 #include <esp_https_server.h>
 #include "wifi.h"
+#include "misc.h"
 
 void httpServer_init(void);
 void httpServer_start();
