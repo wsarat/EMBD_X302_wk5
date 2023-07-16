@@ -10,6 +10,8 @@
 #include "lwip/err.h"   // netif
 #include "lwip/sys.h"
 
+#include "httpServer.h"
+
 struct ap_info_t {
     uint8_t mac[6];
     uint8_t ssid[33];

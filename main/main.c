@@ -20,7 +20,7 @@ void app_main(void)
     wifi_init();
     wifi_connect("CefiroIOT", "CefiroA32");
 
-    //httpServer_init();
+    httpServer_init();
     //httpClient_main();
 
     //uint16_t ap_count = 16; //will ne changed after wifi_scan called
