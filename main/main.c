@@ -2,6 +2,7 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 #include "wifi.h"
+#include "httpServer.h"
 #include "httpClient.h"
 
 void nvs_init() {
@@ -19,12 +20,17 @@ void app_main(void)
     wifi_init();
     wifi_connect("CefiroIOT", "CefiroA32");
 
-    httpClient_main();
+    //httpServer_init();
+    //httpClient_main();
 
-    uint16_t ap_count = 16; //will ne changed after wifi_scan called
-    struct ap_info_t ap_list[ap_count];
-
+    //uint16_t ap_count = 16; //will ne changed after wifi_scan called
+    //struct ap_info_t ap_list[ap_count];
+    char response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
+    int ret;
     while (true) {
+        ret = httpClient_get("http://192.168.8.176:8000", "", response_buffer);
+        printf("%s\n", response_buffer);
+
         // wifi_scan(&ap_list, &ap_count);
 
         // for (int i=0; i<ap_count; i++) {
@@ -34,6 +40,6 @@ void app_main(void)
         //         ap_list[i].ssid
         //     );
         // }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(10000));
     }
 }
