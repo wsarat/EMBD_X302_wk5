@@ -23,25 +23,12 @@ void app_main(void)
 
     httpServer_init();
     //httpClient_main();
+
     misc_init();
+    misc_wifi_scan();
+    misc_http_get("http://google.com", "");
 
-    //uint16_t ap_count = 16; //will ne changed after wifi_scan called
-    //struct ap_info_t ap_list[ap_count];
-    char response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
-    int ret;
     while (true) {
-        ret = httpClient_get("http://192.168.8.176:8000", "", response_buffer);
-        printf("%s\n", response_buffer);
-
-        // wifi_scan(&ap_list, &ap_count);
-
-        // for (int i=0; i<ap_count; i++) {
-        //     printf("%02X:%02X:%02X:%02X:%02X:%02X : ftm %lX, %lX : %s\n",
-        //         ap_list[i].mac[0], ap_list[i].mac[1], ap_list[i].mac[2], ap_list[i].mac[3], ap_list[i].mac[4], ap_list[i].mac[5],
-        //         ap_list[i].ftm_initiator, ap_list[i].ftm_responder, 
-        //         ap_list[i].ssid
-        //     );
-        // }
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }

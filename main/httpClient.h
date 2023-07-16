@@ -19,16 +19,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-// #if CONFIG_MBEDTLS_CERTIFICATE_BUNDLE
-// #include "esp_crt_bundle.h"
-// #endif
-
-
-
 #define MAX_HTTP_RECV_BUFFER 512
 #define MAX_HTTP_OUTPUT_BUFFER 1024
 
-void httpClient_main();
 int httpClient_get(const char* url, const char* query, char* resp);
 
 #endif
