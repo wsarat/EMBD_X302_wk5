@@ -3,8 +3,24 @@
     <title>EMBD_X403_wk5</title>
 </head>
 <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js" integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/cupertino/jquery-ui.min.css" integrity="sha512-9SEz2+WNpf9iyTy855xgweUvhu8Rz9BnU4d/MBFSFSh4kaAFeCA+/Otj5/NaB9PiMpjO1ajRNbplQTXa182X9A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/cupertino/theme.min.css" integrity="sha512-+Ai9V7NStMKCL1dF/876OSoFPtHzP0zEmPsv4pSqflcnghjeleMeOuCcleYQ2WSn1G+VIY3aYDCBKqmrV8yvAA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+#slider {
+    width: 300px;
+    margin: 20px;    
+}
+
+#custom-handle {
+    width: 3em;
+    height: 1.6em;
+    top: 50%;
+    margin-top: -.8em;
+    text-align: center;
+    line-height: 1.6em;
+}
+</style>
 <script>
 
 function led(on) {
@@ -24,6 +40,22 @@ $(document).ready(function(){
     $("#bttLedOff").click(function(){
         led(0);
     });    
+
+    var handle = $( "#custom-handle" );
+    $( "#slider" ).slider({
+      create: function() {
+        handle.text( $( this ).slider( "value" ) );
+      },
+      slide: function( event, ui ) {
+        handle.text( ui.value );
+        $.ajax({
+        url: "/led?level="+ui.value,
+            //context: document.body
+            }).done(function() {
+                //
+            });
+        }
+    });    
 });
 
 </script>
@@ -31,6 +63,9 @@ $(document).ready(function(){
     <div>
         <button id="bttLedOn">Led On</button>
         <button id="bttLedOff">Led Off</button>
+    </div>
+    <div id="slider">
+        <div id="custom-handle" class="ui-slider-handle"></div>
     </div>
 </body>
 </html>

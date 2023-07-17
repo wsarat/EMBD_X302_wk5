@@ -22,6 +22,7 @@
 void misc_http_get(const char* url);
 void misc_wifi_scan();
 int misc_led(int on);
+int misc_led_level(int pct);
 float misc_temp_read();
 void misc_init();
 void misc_whatsapp(const unsigned * text);

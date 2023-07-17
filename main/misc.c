@@ -73,6 +73,14 @@ int misc_led(int on) {
     
 }
 
+int misc_led_level(int pct) {
+    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, pct*LEDC_DUTY_100/100 ));
+    ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
+
+    return 0;
+    
+}
+
 float misc_temp_read() {
     float tempC;
 
@@ -119,7 +127,7 @@ void misc_init() {
     temperature_sensor_install(&temp_sensor_config, &temp_sensor);
 
     misc_ledc_init();
-    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_DUTY_20));
+    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 0));
 }
 
 void misc_whatsapp_temp() {
