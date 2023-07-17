@@ -3,6 +3,8 @@
 
 static const char *TAG = "httpClient";
 
+int data_len = 0;
+
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
     static char *output_buffer;  // Buffer to store response of http request from event handler
@@ -13,6 +15,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             break;
         case HTTP_EVENT_ON_CONNECTED:
             ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
+            data_len = 0; // chunked work around.
             break;
         case HTTP_EVENT_HEADER_SENT:
             ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
@@ -50,6 +53,17 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
                     }
                 }
                 output_len += copy_len;
+            } else {
+                // chunked work around.
+                //printf("httpClient - response data is chunked.\n");
+                //printf("HTTP_EVENT_ON_DATA => data_len = %d, data_len = %d\n", data_len, evt->data_len);
+                //printf("%s\n", (char *)evt->data);
+                if (evt->user_data && (data_len + evt->data_len) < MAX_HTTP_OUTPUT_BUFFER) {
+                    memcpy(evt->user_data + data_len, evt->data, evt->data_len);
+                    data_len += evt->data_len;
+                } else {
+                    printf("buffer not enought!\n");
+                }
             }
 
             break;
@@ -83,27 +97,25 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             esp_http_client_set_header(evt->client, "Accept", "text/html");
             esp_http_client_set_redirection(evt->client);
             break;
+        default:
+            printf("FIXME: %d\n", evt->event_id);
+            break;
     }
     return ESP_OK;
 }
 
-int httpClient_get(const char* url, const char* query, char* resp) {
+int httpClient_get(const char* url, char* resp) {
     int retCode = 0;
-    //char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
-    /**
-     * NOTE: All the configuration parameters for http_client must be spefied either in URL or as host and path parameters.
-     * If host and path parameters are not set, query parameter will be ignored. In such cases,
-     * query parameter should be specified in URL.
-     *
-     * If URL as well as host and path parameters are specified, values of host and path will be considered.
-     */
+
     esp_http_client_config_t config = {
         .url = url,
-        //.path = "/",
-        .query = query,
+        //.query = query,
         .event_handler = _http_event_handler,
         .user_data = resp,        // Pass address of local buffer to get response
         .disable_auto_redirect = true,
+        //.method = HTTP_METHOD_GET,
+        //.transport_type = HTTP_TRANSPORT_OVER_SSL, 
+        //.crt_bundle_attach = esp_crt_bundle_attach,
     };
 
     esp_http_client_handle_t client = esp_http_client_init(&config);
@@ -118,10 +130,6 @@ int httpClient_get(const char* url, const char* query, char* resp) {
     } else {
         ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
     }
-    //ESP_LOG_BUFFER_HEX(TAG, local_response_buffer, strlen(local_response_buffer));   
-    // printf("HTTP Resp -- start\n");
-    // printf("%s\n", resp);
-    // printf("HTTP Resp -- end\n");
 
     esp_http_client_cleanup(client);
 

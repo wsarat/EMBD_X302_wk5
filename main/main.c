@@ -20,14 +20,13 @@ void app_main(void)
     nvs_init();
     wifi_init();
     wifi_connect("CefiroIOT", "CefiroA32");
-
     httpServer_init();
-    //httpClient_main();
 
     misc_init();
     misc_wifi_scan();
-    misc_http_get("http://google.com", "");
-
+    
+    //misc_http_get("https://www.google.com");
+    misc_http_get("https://api.open-meteo.com/v1/forecast?latitude=36.9741&longitude=-122.0308&hourly=temperature_2m&forecast_days=1");
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
