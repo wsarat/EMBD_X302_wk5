@@ -1,4 +1,4 @@
-idf_component_register(SRCS "misc.c" "httpServer.c" "httpClient.c" "wifi.c" "main.c"
+idf_component_register(SRCS "ds18b20_lowlevel.c" "misc.c" "httpServer.c" "httpClient.c" "wifi.c" "main.c"
                     INCLUDE_DIRS "."
                     REQUIRES ${requires}
                     EMBED_TXTFILES "certs/servercert.pem"

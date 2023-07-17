@@ -4,6 +4,7 @@
 </head>
 <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js" integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.canvasjs.com/jquery.canvasjs.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/cupertino/jquery-ui.min.css" integrity="sha512-9SEz2+WNpf9iyTy855xgweUvhu8Rz9BnU4d/MBFSFSh4kaAFeCA+/Otj5/NaB9PiMpjO1ajRNbplQTXa182X9A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/cupertino/theme.min.css" integrity="sha512-+Ai9V7NStMKCL1dF/876OSoFPtHzP0zEmPsv4pSqflcnghjeleMeOuCcleYQ2WSn1G+VIY3aYDCBKqmrV8yvAA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
@@ -23,6 +24,85 @@
 </style>
 <script>
 
+var chart;
+
+var options = {
+	exportEnabled: false,
+	animationEnabled: true,
+	title:{
+		text: "CPU Temp vs Ambient temp"
+	},
+	axisX: {
+		title: "Time"
+	},
+	axisY: {
+		title: "Temperature",
+		titleFontColor: "#4F81BC",
+		lineColor: "#4F81BC",
+		labelFontColor: "#4F81BC",
+		tickColor: "#4F81BC"
+	},
+	toolTip: {
+		shared: true
+	},
+	legend: {
+		cursor: "pointer",
+		itemclick: toggleDataSeries
+	},
+	data: [{
+		type: "spline",
+		name: "CPU Temp",
+		showInLegend: true,
+		xValueFormatString: "hh:mm:ss",
+		yValueFormatString: "##,## C",
+		dataPoints: []
+	},
+	{
+		type: "spline",
+		name: "Ambient Temp",
+		axisYType: "secondary",
+		showInLegend: true,
+		xValueFormatString: "hh:mm:ss",
+		yValueFormatString: "##.## C",
+		dataPoints: []
+	}]
+};
+
+function addDataToChart(date, cpuTemp, ambTemp) {
+    var chart = $("#chartContainer").CanvasJSChart();
+    
+    chart.data[0].addTo(
+        "dataPoints", 
+        {x: date, y: cpuTemp}
+        ); 
+    
+    chart.data[1].addTo(
+        "dataPoints", 
+        {x: date, y: ambTemp}
+        ); 
+}
+
+function testAdd() {
+    $.ajax({
+        url: "/getTemp",
+        context: document.body
+    }).done(function(jsonObj) {
+        //alert("done");
+        addDataToChart(new Date(), jsonObj.cpuTemp, jsonObj.extTemp);
+    });
+    //
+    setTimeout("testAdd();", 1000);
+}
+
+function toggleDataSeries(e) {
+	if (typeof (e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+		e.dataSeries.visible = false;
+	} else {
+		e.dataSeries.visible = true;
+	}
+	e.chart.render();
+}
+
 function led(on) {
     $.ajax({
         url: on? "/ledOn":"/ledOff",
@@ -33,12 +113,20 @@ function led(on) {
 }
 
 $(document).ready(function(){
+    //chart = new CanvasJS.Chart("#chartContainer", options);
+    //chart.render();
+    $("#chartContainer").CanvasJSChart(options);
+
     $("#bttLedOn").click(function(){
         led(1);
     });
 
     $("#bttLedOff").click(function(){
         led(0);
+    });    
+
+    $("#bttTest").click(function(){
+        testAdd();
     });    
 
     var handle = $( "#custom-handle" );
@@ -55,14 +143,20 @@ $(document).ready(function(){
                 //
             });
         }
-    });    
+    });   
+    
+    //setTimeout(testAdd(), 5000);
+    //testAdd();
+    setTimeout("testAdd();", 3000);
 });
 
 </script>
 <body>
+    <div id="chartContainer" style="height: 300px; width: 100%;"></div>
     <div>
         <button id="bttLedOn">Led On</button>
         <button id="bttLedOff">Led Off</button>
+        <button id="bttTest">Update</button>
     </div>
     <div id="slider">
         <div id="custom-handle" class="ui-slider-handle"></div>

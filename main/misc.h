@@ -7,6 +7,7 @@
 
 #include "wifi.h"
 #include "httpClient.h"
+#include "ds18b20_lowlevel.h"
 
 #define LED_PIN GPIO_NUM_2
 
@@ -19,6 +20,8 @@
 #define LEDC_DUTY_100           (8191) // Set duty to 50%. ((2 ** 13) - 1) * 50% = 4095
 #define LEDC_FREQUENCY          (5000) // Frequency in Hertz. Set frequency at 5 kHz
 
+static float _extTempC;
+
 void misc_http_get(const char* url);
 void misc_wifi_scan();
 int misc_led(int on);
@@ -27,5 +30,8 @@ float misc_temp_read();
 void misc_init();
 void misc_whatsapp(const unsigned * text);
 void misc_whatsapp_temp();
+
+void misc_read_extTemp();
+float misc_get_extTemp();
 
 #endif

@@ -91,6 +91,27 @@ static const httpd_uri_t httpd_led = {
     .handler   = httpd_handler_led
 };    
 
+static esp_err_t httpd_handler_getTemp(httpd_req_t *req)
+{
+    char text[64];
+    
+    float cpuTemp = misc_temp_read();
+    float extTemp = misc_get_extTemp();
+    sprintf(text, "{ \"cpuTemp\": %.01f, \"extTemp\": %.01f }", cpuTemp, extTemp);
+
+    httpd_resp_set_type(req, "text/x-json");
+    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    httpd_resp_send(req, text, HTTPD_RESP_USE_STRLEN);
+
+    return ESP_OK;
+}
+
+static const httpd_uri_t httpd_getTemp = {
+    .uri       = "/getTemp",
+    .method    = HTTP_GET,
+    .handler   = httpd_handler_getTemp
+};
+
 static httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server = NULL;
@@ -122,6 +143,7 @@ static httpd_handle_t start_webserver(void)
     httpd_register_uri_handler(server, &httpd_ledOn);
     httpd_register_uri_handler(server, &httpd_ledOff);
     httpd_register_uri_handler(server, &httpd_led);
+    httpd_register_uri_handler(server, &httpd_getTemp);
     return server;
 }
 

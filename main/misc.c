@@ -4,6 +4,7 @@
 #define WHATSAPP_KEY    "5302599"
 
 temperature_sensor_handle_t temp_sensor = NULL;
+static pthread_mutex_t extTempMutex;
 
 char *url_encode(const unsigned char *str)
 {
@@ -86,7 +87,7 @@ float misc_temp_read() {
 
     ESP_ERROR_CHECK(temperature_sensor_enable(temp_sensor));
     ESP_ERROR_CHECK(temperature_sensor_get_celsius(temp_sensor, &tempC));
-    printf("Temperature is %.02f °C\n", tempC);
+    //printf("Temperature is %.02f °C\n", tempC);
     ESP_ERROR_CHECK(temperature_sensor_disable(temp_sensor));   
 
     return tempC;
@@ -128,6 +129,10 @@ void misc_init() {
 
     misc_ledc_init();
     ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 0));
+
+    if(pthread_mutex_init (&extTempMutex, NULL) != 0){
+        printf("Failed to initialize the sliderMutex mutex");
+    }
 }
 
 void misc_whatsapp_temp() {
@@ -140,3 +145,25 @@ void misc_whatsapp_temp() {
     //misc_whatsapp(text);
 }
 
+void misc_read_extTemp() {
+    float extTempC = ds18b20_cmd_read_temp();
+    if (extTempC < -126.0 || extTempC > 127.0)
+        return;
+
+    printf("extTemp: %.02f\n", extTempC);
+    
+    if (pthread_mutex_trylock(&extTempMutex) == 0){
+        _extTempC = extTempC;
+        pthread_mutex_unlock(&extTempMutex);
+    }
+}
+
+float misc_get_extTemp() {
+    float extTempC = -127.0;
+    if (pthread_mutex_lock(&extTempMutex) == 0){
+        extTempC = _extTempC;
+        pthread_mutex_unlock(&extTempMutex);
+    }
+
+    return extTempC;
+}

@@ -3,3 +3,4 @@
 **/.devcontainer
 sdkconfig.old
 debug.log
+**/.DS_Store
