@@ -1,0 +1,36 @@
+<html>
+<head>
+    <title>EMBD_X403_wk5</title>
+</head>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/cupertino/jquery-ui.min.css" integrity="sha512-9SEz2+WNpf9iyTy855xgweUvhu8Rz9BnU4d/MBFSFSh4kaAFeCA+/Otj5/NaB9PiMpjO1ajRNbplQTXa182X9A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/cupertino/theme.min.css" integrity="sha512-+Ai9V7NStMKCL1dF/876OSoFPtHzP0zEmPsv4pSqflcnghjeleMeOuCcleYQ2WSn1G+VIY3aYDCBKqmrV8yvAA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script>
+
+function led(on) {
+    $.ajax({
+        url: on? "/ledOn":"/ledOff",
+        //context: document.body
+    }).done(function() {
+        //
+    });
+}
+
+$(document).ready(function(){
+    $("#bttLedOn").click(function(){
+        led(1);
+    });
+
+    $("#bttLedOff").click(function(){
+        led(0);
+    });    
+});
+
+</script>
+<body>
+    <div>
+        <button id="bttLedOn">Led On</button>
+        <button id="bttLedOff">Led Off</button>
+    </div>
+</body>
+</html>

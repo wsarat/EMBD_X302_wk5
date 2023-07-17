@@ -30,7 +30,7 @@ char *url_encode(const unsigned char *str)
 
 void misc_whatsapp(const unsigned * text) {
     char url[128];
-    sprintf(url, "https://api.callmebot.com/whatsapp.php?phone=%s&text=%s&apikey=%s", WHATSAPP_PHONE, url_encode(text), WHATSAPP_KEY);
+    snprintf(url, 128, "https://api.callmebot.com/whatsapp.php?phone=%s&text=%s&apikey=%s", WHATSAPP_PHONE, url_encode(text), WHATSAPP_KEY);
     misc_http_get(url);
 }
 
@@ -57,16 +57,56 @@ void misc_http_get(const char* url) {
 }
 
 int misc_led(int on) {
-    gpio_set_level(LED_PIN, on);
+    //gpio_set_level(LED_PIN, on);
+    //return gpio_get_level(LED_PIN);
 
-    return gpio_get_level(LED_PIN);
+    if (on) {
+        printf("Turn LED On\n");
+        ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_DUTY_100));
+    } else {
+        printf("Turn LED Off\n");
+        ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, 0));
+    }
+    ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
+
+    return 0;
+    
 }
 
 float misc_temp_read() {
-    float tsens_value;
-    temperature_sensor_get_celsius(temp_sensor, &tsens_value);
+    float tempC;
 
-    return tsens_value;
+    ESP_ERROR_CHECK(temperature_sensor_enable(temp_sensor));
+    ESP_ERROR_CHECK(temperature_sensor_get_celsius(temp_sensor, &tempC));
+    printf("Temperature is %.02f °C\n", tempC);
+    ESP_ERROR_CHECK(temperature_sensor_disable(temp_sensor));   
+
+    return tempC;
+}
+
+void misc_ledc_init(void)
+{
+    // Prepare and then apply the LEDC PWM timer configuration
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode       = LEDC_MODE,
+        .timer_num        = LEDC_TIMER,
+        .duty_resolution  = LEDC_DUTY_RES,
+        .freq_hz          = LEDC_FREQUENCY,  // Set output frequency at 5 kHz
+        .clk_cfg          = LEDC_AUTO_CLK
+    };
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+
+    // Prepare and then apply the LEDC PWM channel configuration
+    ledc_channel_config_t ledc_channel = {
+        .speed_mode     = LEDC_MODE,
+        .channel        = LEDC_CHANNEL,
+        .timer_sel      = LEDC_TIMER,
+        .intr_type      = LEDC_INTR_DISABLE,
+        .gpio_num       = LED_PIN,
+        .duty           = 0, // Set duty to 0%
+        .hpoint         = 0
+    };
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
 }
 
 void misc_init() {
@@ -77,6 +117,18 @@ void misc_init() {
     // internal temp sensors
     temperature_sensor_config_t temp_sensor_config = TEMPERATURE_SENSOR_CONFIG_DEFAULT(10, 50);
     temperature_sensor_install(&temp_sensor_config, &temp_sensor);
-    temperature_sensor_enable(temp_sensor);
 
+    misc_ledc_init();
+    ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, LEDC_DUTY_20));
 }
+
+void misc_whatsapp_temp() {
+    float temp = misc_temp_read();
+    char text[64];
+
+    snprintf(text,64,"ESP32 internet temp = %.02f C", temp);
+    printf("text");
+    
+    //misc_whatsapp(text);
+}
+

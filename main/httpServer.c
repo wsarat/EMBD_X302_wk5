@@ -5,13 +5,14 @@
 */
 
 static const char *HTTPSERVER_TAG = "httpServer";
-static const char *HTML = "<a href=/ledOn>Turn LED On</a><br><a href=/ledOff>Turn LED Off</a>";
 
 /* An HTTP GET handler */
 static esp_err_t root_get_handler(httpd_req_t *req)
 {
+    extern const char page1_html[] asm("_binary_page1_html_start");
+
     httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, HTML, HTTPD_RESP_USE_STRLEN);
+    httpd_resp_send(req, page1_html, HTTPD_RESP_USE_STRLEN);
 
     return ESP_OK;
 }
@@ -26,7 +27,7 @@ static esp_err_t httpd_handler_ledOn(httpd_req_t *req)
 {
     int led = misc_led(1);
     httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, HTML, HTTPD_RESP_USE_STRLEN);
+    httpd_resp_send(req, "ok", HTTPD_RESP_USE_STRLEN);
 
     return ESP_OK;
 }
@@ -41,7 +42,7 @@ static esp_err_t httpd_handler_ledOff(httpd_req_t *req)
 {
     int led = misc_led(0);
     httpd_resp_set_type(req, "text/html");
-    httpd_resp_send(req, HTML, HTTPD_RESP_USE_STRLEN);
+    httpd_resp_send(req, "ok", HTTPD_RESP_USE_STRLEN);
 
     return ESP_OK;
 }
