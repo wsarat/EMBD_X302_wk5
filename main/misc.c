@@ -1,6 +1,38 @@
 #include "misc.h"
 
+#define WHATSAPP_PHONE  "16506096944"
+#define WHATSAPP_KEY    "5302599"
+
 temperature_sensor_handle_t temp_sensor = NULL;
+
+char *url_encode(const unsigned char *str)
+{
+    static const char *hex = "0123456789abcdef";
+    static char encoded[1024];
+    char *p = encoded;
+    while (*str)
+    {
+        if (isalnum(*str) || *str == '-' || *str == '_' || *str == '.' || *str == '~')
+        {
+            *p++ = *str;
+        }
+        else
+        {
+            *p++ = '%';
+            *p++ = hex[*str >> 4];
+            *p++ = hex[*str & 15];
+        }
+        str++;
+    }
+    *p = '\0';
+    return encoded;
+}
+
+void misc_whatsapp(const unsigned * text) {
+    char url[128];
+    sprintf(url, "https://api.callmebot.com/whatsapp.php?phone=%s&text=%s&apikey=%s", WHATSAPP_PHONE, url_encode(text), WHATSAPP_KEY);
+    misc_http_get(url);
+}
 
 void misc_wifi_scan() {
     uint16_t ap_count = 8; //will ne changed after wifi_scan called

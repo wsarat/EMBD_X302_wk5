@@ -27,6 +27,7 @@ void app_main(void)
     
     //misc_http_get("https://www.google.com");
     misc_http_get("https://api.open-meteo.com/v1/forecast?latitude=36.9741&longitude=-122.0308&hourly=temperature_2m&forecast_days=1");
+    //misc_whatsapp("Hello World!");
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
