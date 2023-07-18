@@ -4,3 +4,4 @@
 sdkconfig.old
 debug.log
 **/.DS_Store
+**/my_settings.h

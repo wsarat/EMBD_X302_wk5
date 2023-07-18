@@ -6,6 +6,7 @@
 #include "httpClient.h"
 #include "misc.h"
 #include "ds18b20_lowlevel.h"
+#include "my_settings.h"
 
 void nvs_init() {
     esp_err_t ret = nvs_flash_init();
@@ -20,7 +21,7 @@ void app_main(void)
 {
     nvs_init();
     wifi_init();
-    wifi_connect("CefiroIOT", "CefiroA32");
+    wifi_connect(WIFI_SSID, WIFI_PASSWD);
     httpServer_init();
 
     misc_init();

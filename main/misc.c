@@ -1,7 +1,5 @@
 #include "misc.h"
-
-#define WHATSAPP_PHONE  "16506096944"
-#define WHATSAPP_KEY    "5302599"
+#include "my_settings.h"
 
 temperature_sensor_handle_t temp_sensor = NULL;
 static pthread_mutex_t extTempMutex;
