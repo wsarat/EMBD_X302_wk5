@@ -33,12 +33,16 @@ uint8_t ds18b20_reset()
 
     if (read > 0) {
         // no 1-wite pulled down
+        ets_delay_us(tRSTH);
         gpio_set_level(ds18b20_pin, 1);
+        ets_delay_us(tREC);
         printf("ds18b20 not found!\n");
         return 1;
     }
     ets_delay_us(tRSTH);
     gpio_set_level(ds18b20_pin, 1);
+    ets_delay_us(tREC);
+    ets_delay_us(tREC);
     ets_delay_us(tREC);
     //printf("ds18b20 pull low %d => device present!\n", read);
 

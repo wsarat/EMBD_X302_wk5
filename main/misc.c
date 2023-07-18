@@ -147,10 +147,10 @@ void misc_whatsapp_temp() {
 
 void misc_read_extTemp() {
     float extTempC = ds18b20_cmd_read_temp();
+    printf("extTemp: %.02f\n", extTempC);
+    
     if (extTempC < -126.0 || extTempC > 127.0)
         return;
-
-    printf("extTemp: %.02f\n", extTempC);
     
     if (pthread_mutex_trylock(&extTempMutex) == 0){
         _extTempC = extTempC;

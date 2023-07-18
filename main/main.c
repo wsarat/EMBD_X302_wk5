@@ -33,10 +33,8 @@ void app_main(void)
     //misc_whatsapp("Hello World!");
 
     while (true) {
-        // float extTempC = ds18b20_cmd_read_temp();
-        // printf("extTemp: %.02f\n", extTempC);
         misc_read_extTemp();
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
