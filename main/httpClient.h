@@ -12,5 +12,6 @@
 #define MAX_HTTP_OUTPUT_BUFFER 1024
 
 int httpClient_get(const char* url, char* resp);
+int httpClient_get_with_json(const char* url, const char* json_data, char* resp);
 
 #endif

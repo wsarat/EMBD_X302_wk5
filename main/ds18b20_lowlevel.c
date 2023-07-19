@@ -6,14 +6,14 @@
 #include "freertos/task.h"
 
 u_int8_t ds18b20_pin;
-portMUX_TYPE timeCriticalMutex = portMUX_INITIALIZER_UNLOCKED;
+
 
 #define tRSTL   480
 #define tRSTH   480
-#define tPDIH   15  // min 15, max 60
+#define tPDIH   45  // min 15, max 60 <- change from 15 to 45 help a lot!!
 #define tPDLOW  60  // min 60, max 240
 #define tSLOT   60  // min 60, max 120
-#define tREC    20   // min 1, max -
+#define tREC    5   // min 1, max -
 #define tRDV    5   // min -, max 15
 #define tLOW0   60  // min 60, max 120
 #define tLOW1   10   // min 1, max 15
@@ -22,29 +22,34 @@ portMUX_TYPE timeCriticalMutex = portMUX_INITIALIZER_UNLOCKED;
 uint8_t ds18b20_reset() 
 {
     int read = 0;
-    
-    portENTER_CRITICAL(&timeCriticalMutex);
+
+    gpio_set_level(ds18b20_pin, 1);
+    ets_delay_us(tREC);
+
     gpio_set_level(ds18b20_pin, 0);
     ets_delay_us(tRSTL);
     gpio_set_level(ds18b20_pin, 1);
-    //ets_delay_us(tPDIH); // skip delay, we are so late!!!
-    read = gpio_get_level(ds18b20_pin);
-    portEXIT_CRITICAL(&timeCriticalMutex);
+    ets_delay_us(tPDIH); // 45 uS 
 
-    if (read > 0) {
-        // no 1-wite pulled down
-        ets_delay_us(tRSTH);
-        gpio_set_level(ds18b20_pin, 1);
-        ets_delay_us(tREC);
+    int count = 40; // try 
+    while (count-- > 0) {
+        read = gpio_get_level(ds18b20_pin);
+        //printf("%s", read?"1":"0");
+
+        if (read == 0 && count < 30) {
+            // print only if retry more than 10 times
+            printf("ds18b20 found (%d tried!!!)\n", 40-count);
+            break;
+        }
+    }
+    if (read == 1) {
         printf("ds18b20 not found!\n");
+        gpio_set_level(ds18b20_pin, 1);
         return 1;
     }
+
     ets_delay_us(tRSTH);
     gpio_set_level(ds18b20_pin, 1);
-    ets_delay_us(tREC);
-    ets_delay_us(tREC);
-    ets_delay_us(tREC);
-    //printf("ds18b20 pull low %d => device present!\n", read);
 
     return 0;
 }
@@ -176,7 +181,6 @@ void ds18b20_init(u_int8_t pin)
     gpio_set_level(ds18b20_pin, 1);
     ets_delay_us(tREC);
 
-    ds18b20_reset();
     ds18b20_cmd_readrom();
     ds18b20_cmd_read_power_supply();
 }

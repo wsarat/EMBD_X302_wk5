@@ -4,7 +4,6 @@
 #include "driver/gpio.h"
 #include "driver/temperature_sensor.h"
 #include "driver/ledc.h"
-
 #include "wifi.h"
 #include "httpClient.h"
 #include "ds18b20_lowlevel.h"
@@ -33,5 +32,7 @@ void misc_whatsapp_temp();
 
 void misc_read_extTemp();
 float misc_get_extTemp();
+
+void mise_location_services();
 
 #endif

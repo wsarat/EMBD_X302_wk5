@@ -113,7 +113,7 @@ void wifi_ftm_responder(uint8_t channel) {
     return;  
 }
 
-void _wifi_scan(wifi_ap_record_t *ap_info, uint16_t *max) {
+void wifi_scan(wifi_ap_record_t *ap_info, uint16_t *max) {
     // uint16_t number = DEFAULT_SCAN_LIST_SIZE;
     // wifi_ap_record_t ap_info[DEFAULT_SCAN_LIST_SIZE];
     // memset(ap_info, 0, sizeof(ap_info));
@@ -135,22 +135,6 @@ void _wifi_scan(wifi_ap_record_t *ap_info, uint16_t *max) {
     //     // }
     //     ESP_LOGI(WIFI_TAG, "Channel \t\t%d", *ap_info[i]->primary);
     // }    
-}
-
-void wifi_scan(struct ap_info_t *ap_list, uint16_t *max) {
-    wifi_ap_record_t ap_info[*max];
-    memset(ap_info, 0, sizeof(ap_info));
-
-    _wifi_scan(&ap_info, max);
-
-    for (int i=0; i<*max; i++) {
-        memcpy(ap_list[i].mac, ap_info[i].bssid, sizeof(ap_info[i].bssid));
-        memcpy(ap_list[i].ssid, ap_info[i].ssid, sizeof(ap_info[i].ssid));     
-
-        ap_list[i].channel = ap_info[i].primary;
-        ap_list[i].ftm_initiator = ap_info[i].ftm_initiator;
-        ap_list[i].ftm_responder = ap_info[i].ftm_responder;
-    }
 }
 
 void wifi_connect(const char* ssid, const char* password) {   

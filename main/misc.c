@@ -35,12 +35,12 @@ void misc_whatsapp(const unsigned * text) {
 
 void misc_wifi_scan() {
     uint16_t ap_count = 8; //will ne changed after wifi_scan called
-    struct ap_info_t ap_list[ap_count];
+    wifi_ap_record_t ap_list[ap_count];
     wifi_scan(&ap_list, &ap_count);
 
     for (int i=0; i<ap_count; i++) {
-        printf("%02X:%02X:%02X:%02X:%02X:%02X : ftm %lX, %lX : %s\n",
-            ap_list[i].mac[0], ap_list[i].mac[1], ap_list[i].mac[2], ap_list[i].mac[3], ap_list[i].mac[4], ap_list[i].mac[5],
+        printf("%02X:%02X:%02X:%02X:%02X:%02X : ftm %X, %X : %s\n",
+            ap_list[i].bssid[0], ap_list[i].bssid[1], ap_list[i].bssid[2], ap_list[i].bssid[3], ap_list[i].bssid[4], ap_list[i].bssid[5],
             ap_list[i].ftm_initiator, ap_list[i].ftm_responder, 
             ap_list[i].ssid
         );
@@ -164,4 +164,86 @@ float misc_get_extTemp() {
     }
 
     return extTempC;
+}
+
+/*
+    https://www.googleapis.com/geolocation/v1/geolocate?key=YOUR_API_KEY
+
+    {
+      "homeMobileCountryCode": 310,
+      "homeMobileNetworkCode": 410,
+      "radioType": "gsm",
+      "carrier": "Vodafone",
+      "considerIp": true,
+      "cellTowers": [
+        // See the Cell Tower Objects section below.
+      ],
+      "wifiAccessPoints": [
+        {
+            "macAddress": "9c:1c:12:b0:45:f1",
+            "signalStrength": -43,
+            "signalToNoiseRatio": 0,
+            "channel": 11,
+            "age": 0
+        }
+      ]
+    }
+*/
+
+/*
+    from class slide
+
+    {
+    "considerIp": false,
+    "wifiAccessPoints": [
+        {
+        "macAddress": "3c:37:86:5d:75:d4",
+        "signalStrength": -35,
+        "signalToNoiseRatio": 0
+        },
+        {
+        "macAddress": "94:b4:0f:fd:c1:40",
+        "signalStrength": -35,
+        "signalToNoiseRatio": 0
+        }
+    ]
+    }
+
+*/
+
+void mise_location_services() {
+    char requestBody[512]; // hope we have enought ram
+    char *ptr = requestBody;
+    int print_sz = 0;
+
+    uint16_t ap_count = 2;
+    wifi_ap_record_t ap_list[ap_count];
+    wifi_scan(&ap_list, &ap_count);
+
+    print_sz = sprintf(ptr, "{\"considerIp\": false, \"wifiAccessPoints\": [");
+    ptr += print_sz;
+
+    for (int i=0; i<ap_count; i++) {
+        print_sz = sprintf(ptr, "{ \"macAddress\": \"%02X:%02X:%02X:%02X:%02X:%02X\", \"signalStrength\": %d,\"signalToNoiseRatio\": 0 }",
+            ap_list[i].bssid[0], ap_list[i].bssid[1], ap_list[i].bssid[2], ap_list[i].bssid[3], ap_list[i].bssid[4], ap_list[i].bssid[5],
+            ap_list[i].rssi);
+        ptr += print_sz;
+
+        if (i+1 < ap_count) {
+            print_sz = sprintf(ptr, ",");
+            ptr += print_sz;
+        }
+    }
+    print_sz = sprintf(ptr, "]}\n");
+    ptr += print_sz;
+
+    printf("[%d] %s\n", strlen(requestBody), requestBody);
+
+    char url[128];
+    char response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
+
+    snprintf(url, 128, "https://www.googleapis.com/geolocation/v1/geolocate?key=%s", GOOGLEMAP_KEY);
+    httpClient_get_with_json(url, requestBody, &response_buffer);
+
+    printf("%s\n", response_buffer);
 }

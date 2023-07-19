@@ -135,3 +135,41 @@ int httpClient_get(const char* url, char* resp) {
 
     return retCode;
 }
+
+int httpClient_get_with_json(const char* url, const char* json_data, char* resp) {
+    int retCode = 0;
+
+    esp_http_client_config_t config = {
+        .url = url,
+        .event_handler = _http_event_handler,
+        .user_data = resp,        // Pass address of local buffer to get response
+        .disable_auto_redirect = true,
+        .method = HTTP_METHOD_GET,
+        //.method = HTTP_METHOD_POST,
+    };
+
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+
+    esp_http_client_set_header(client, "Content-Type", "application/json");
+    // esp_http_client_set_post_field(client, json_data, strlen(json_data));
+
+    esp_http_client_set_header(client, "X-Request-Body", json_data);
+    char content_len[16];
+    snprintf(content_len, 16, "%d", strlen(json_data));
+    esp_http_client_set_header(client, "Content-Length: ", content_len);
+
+    // GET
+    esp_err_t err = esp_http_client_perform(client);
+    if (err == ESP_OK) {
+        retCode = esp_http_client_get_status_code(client);
+        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRId64,
+                esp_http_client_get_status_code(client),
+                esp_http_client_get_content_length(client));
+    } else {
+        ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+    }
+
+    esp_http_client_cleanup(client);
+
+    return retCode;
+}

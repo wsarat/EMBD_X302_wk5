@@ -6,7 +6,7 @@
 #include "httpClient.h"
 #include "misc.h"
 #include "ds18b20_lowlevel.h"
-#include "my_settings.h"
+#include "my_settings.h" // make your own my_settings.h
 
 void nvs_init() {
     esp_err_t ret = nvs_flash_init();
@@ -25,13 +25,15 @@ void app_main(void)
     httpServer_init();
 
     misc_init();
-    misc_wifi_scan();
-
+    
     ds18b20_init(1);
     
     //misc_http_get("https://www.google.com");
-    misc_http_get("https://api.open-meteo.com/v1/forecast?latitude=36.9741&longitude=-122.0308&hourly=temperature_2m&forecast_days=1");
+    //misc_http_get("https://api.open-meteo.com/v1/forecast?latitude=36.9741&longitude=-122.0308&hourly=temperature_2m&forecast_days=1");
     //misc_whatsapp("Hello World!");
+    misc_wifi_scan();
+
+    //mise_location_services();
 
     while (true) {
         misc_read_extTemp();
