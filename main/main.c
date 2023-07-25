@@ -25,12 +25,11 @@ void app_main(void)
     httpServer_init();
 
     misc_init();
-    
     ds18b20_init(1);
     
     //misc_http_get("https://www.google.com");
     //misc_http_get("https://api.open-meteo.com/v1/forecast?latitude=36.9741&longitude=-122.0308&hourly=temperature_2m&forecast_days=1");
-    //misc_whatsapp("Hello World!");
+    misc_whatsapp("Hello EMBD.X403");
     misc_wifi_scan();
 
     //mise_location_services();
